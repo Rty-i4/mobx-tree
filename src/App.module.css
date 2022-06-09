@@ -1,0 +1,34 @@
+.app {
+  display: grid;
+  grid-template-columns: 50% 50%;
+  height: 100%;
+  padding: 20px;
+}
+
+.tree {
+  max-height: 80vh;
+  overflow: auto;
+  border: 1px solid grey;
+  padding: 16px;
+}
+
+.current {
+  background-color: #f3f3f3;
+  /* margin: 8px; */
+  border: 1px solid grey;
+  padding: 16px;
+  height: 80vh;
+}
+
+.currentLabel {
+  font-weight: bold;
+  margin-inline-start: 0.5em;
+}
+
+.draggingSource {
+  opacity: 0.3;
+}
+
+.dropTarget {
+  background-color: #e8f0fe;
+}
