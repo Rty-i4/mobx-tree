@@ -32,3 +32,17 @@
 .dropTarget {
   background-color: #e8f0fe;
 }
+.placeholderContainer {
+  position: relative;
+}
+
+.button {
+  background-color: lightblue;
+  padding: 8px 16px;
+  cursor: pointer;
+  border-radius: 8px;
+}
+.button:hover {
+  background-color: #0052cc;
+  color: white;
+}

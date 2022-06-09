@@ -5,54 +5,26 @@ import {
   Tree,
   MultiBackend,
   getBackendOptions,
-  getDescendants,
 } from "@minoru/react-dnd-treeview";
 import { CustomNode } from "./CustomNode";
 import { CustomDragPreview } from "./CustomDragPreview";
 import { theme } from "./theme";
 import styles from "./App.module.css";
-import testData from "./view.json";
+import { observer } from "mobx-react-lite";
+import testData from "./store/testData";
+import { Placeholder } from "./Placeholder";
 
-export default function App() {
+const App = observer(() => {
   const [treeData, setTreeData] = useState([]);
   const handleDrop = (newTreeData) => setTreeData(newTreeData);
   const [selectedNode, setSelectedNode] = useState(null);
   const handleSelect = (node) => setSelectedNode(node);
 
-  // console.log(testData.entityLabelPages[0]);
-
-  const testTree = testData.entityLabelPages[0].labels.map((a, i) => ({
-    id: parseInt(
-      testData.entityLabelPages[0].entityLongIds[i].toString().substring(9),
-      10
-    ),
-    parent:
-      testData.entityLabelPages[0].parentEntityLongIds[i] > 0
-        ? parseInt(
-            testData.entityLabelPages[0].parentEntityLongIds[i]
-              .toString()
-              .substring(9),
-            10
-          )
-        : 0,
-    text: a,
-    droppable: a.includes("element") ? true : false,
-    longId: testData.entityLabelPages[0].entityLongIds[i],
-    parentLongId: testData.entityLabelPages[0].parentEntityLongIds[i],
-  }));
-  // console.log(testTree, "testree");
-  const handleDelete = (id) => {
-    const deleteIds = [
-      id,
-      ...getDescendants(treeData, id).map((node) => node.id),
-    ];
-    const newTree = treeData.filter((node) => !deleteIds.includes(node.id));
-
-    setTreeData(newTree);
-  };
-
   useEffect(() => {
-    setTreeData(testTree);
+    testData.handleDrop(treeData);
+  }, [treeData]);
+  useEffect(() => {
+    testData.fetchData();
   }, []);
   return (
     <ThemeProvider theme={theme}>
@@ -61,7 +33,7 @@ export default function App() {
         <div className={styles.app}>
           <div className={styles.tree}>
             <Tree
-              tree={treeData}
+              tree={testData.items}
               rootId={0}
               render={(node, { depth, isOpen, onToggle }) => (
                 <CustomNode
@@ -80,7 +52,19 @@ export default function App() {
               classes={{
                 draggingSource: styles.draggingSource,
                 dropTarget: styles.dropTarget,
+                placeholder: styles.placeholderContainer,
               }}
+              sort={false}
+              insertDroppableFirst={false}
+              canDrop={(tree, { dragSource, dropTargetId, dropTarget }) => {
+                if (dragSource?.parent === dropTargetId) {
+                  return true;
+                }
+              }}
+              dropTargetOffset={5}
+              placeholderRender={(node, { depth }) => (
+                <Placeholder node={node} depth={depth} />
+              )}
             />
           </div>
           <div>
@@ -105,19 +89,33 @@ export default function App() {
               style={{
                 display: "flex",
                 padding: 20,
-                background: "lightblue",
+
                 justifyContent: "center",
                 alignItems: "center",
                 gap: 20,
               }}
             >
-              <div>Refresh</div>
-              <div onClick={() => console.log(treeData)}>Apply</div>
-              <div onClick={() => handleDelete(selectedNode.id)}>Delete</div>
+              <div
+                className={styles.button}
+                onClick={() => testData.fetchData()}
+              >
+                Refresh
+              </div>
+              <div className={styles.button} onClick={() => testData.apply()}>
+                Apply
+              </div>
+              <div
+                className={styles.button}
+                onClick={() => testData.remove(selectedNode.id)}
+              >
+                Delete
+              </div>
             </div>
           </div>
         </div>
       </DndProvider>
     </ThemeProvider>
   );
-}
+});
+
+export default App;
